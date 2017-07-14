@@ -101,12 +101,20 @@ model.add(Lambda(lambda x: x/255.0 - 0.5,
                 input_shape=(160, 320, 3), 
                 output_shape=(160, 320, 3)))
 
+###
+### Different architecture try : Start of the code
+###
+
 # Corp the image
 #model.add(Cropping2D(cropping=((70,25),(0,0))))
 
 model.add(Convolution2D(64, 3, 3, border_mode='same'))
 model.add(Flatten())
 model.add(Dense(1))
+
+###
+### Different architecture try : End of the code
+###
 
 # Compile and fit the model
 model.compile(loss='mse', optimizer='adam')
