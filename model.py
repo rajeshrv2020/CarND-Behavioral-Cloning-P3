@@ -11,11 +11,16 @@ from keras.models import Model
 from random import shuffle
 import matplotlib.pyplot as plt
 import sklearn
+import math 
 
 # Download the dataset from the following location
 # https://d17h27t6h515a5.cloudfront.net/topher/2016/December/584f6edd_data/data.zip 
 
 samples = []
+batch_size = 32
+no_of_epoch = 10
+
+
 ## Read the CSV File
 with open ('./data/driving_log.csv') as csv_file :
     reader = csv.reader(csv_file)
@@ -62,7 +67,7 @@ def generator (samples, batch_size=128) :
                 
                         # Read the image
                         image = cv2.imread(complete_filename)
-                        # We can do corp and normalize like this
+                        # We can do crop and normalize like this
                         # But as per the tutorial, GPU Peforms this operation faster when using Keras methods
                         #image = image[60:140,0:320]
                         #image = normalize_image(image)
@@ -88,27 +93,32 @@ def generator (samples, batch_size=128) :
                 yield sklearn.utils.shuffle(X_train, Y_train)
 
 
-train_generator = generator(train_samples, batch_size=32)
-validation_generator = generator(validation_samples, batch_size=32)
+train_generator = generator(train_samples, batch_size=batch_size)
+validation_generator = generator(validation_samples, batch_size=batch_size)
 
 
 ####### LeNet Architecture
 
-def LeNet(model) :
+def LeNet(model, dropout=False) :
 
     # first set of CONV => RELU => POOL
-    model.add(Convolution2D(20, 5, 5, border_mode="same"))
-    model.add(Activation("relu"))
-    model.add(MaxPooling2D(pool_size=(2, 2), strides=(2, 2)))
+    model.add(Convolution2D(20, 5, 5, subsample=(2,2),activation="relu"))
+    if dropout : 
+            model.add(Dropout(0.6))
 
     # second set of CONV => RELU => POOL
-    model.add(Convolution2D(50, 5, 5, border_mode="same"))
-    model.add(Activation("relu"))
-    model.add(MaxPooling2D(pool_size=(2, 2), strides=(2, 2)))
+    model.add(Convolution2D(50, 5, 5, subsample=(2,2),activation="relu"))
+    if dropout : 
+            model.add(Dropout(0.6))
+
+    # third  set of CONV => RELU => POOL
+    model.add(Convolution2D(50, 5, 5, subsample=(2,2),activation="relu"))
+    if dropout : 
+            model.add(Dropout(0.6))
 
     # set of FC => RELU layers
     model.add(Flatten())
-    model.add(Dense(1))
+    model.add(Dense(100))
     model.add(Activation("relu"))
  
     # softmax classifier
@@ -116,6 +126,21 @@ def LeNet(model) :
     model.add(Activation("softmax"))
     return model
 
+
+####### Nvidia Architecture
+def NvidiaNet(model) :
+    model.add(Convolution2D(24,5,5,subsample=(2,2),activation="relu"))
+    model.add(Convolution2D(36,5,5,subsample=(2,2),activation="relu"))
+    model.add(Convolution2D(48,5,5,subsample=(2,2),activation="relu"))
+    model.add(Convolution2D(64,3,3,activation="relu"))
+    model.add(Convolution2D(64,3,3,activation="relu"))
+    model.add(Flatten())
+    model.add(Dense(100))
+    model.add(Dense(50))
+    model.add(Dense(10))
+    model.add(Dense(1))
+    return model
+       
 ####### Create the model here #####
 # Create the model
 model = Sequential()
@@ -127,16 +152,22 @@ model.add(Cropping2D(cropping=((60,20),(0,0)), input_shape=(160,320,3)))
 model.add(Lambda(lambda x: x/255.0 - 0.5))
 
 # Train the model with the desired architecture
-model = LeNet(model)
+#model = LeNet(model, True)
+model = NvidiaNet(model)
 
 # Compile and fit the model
 model.compile(loss='mse', optimizer='adam')
+
+N = 6*len(train_samples)
+M = 6*len(validation_samples)
+
 history_object = model.fit_generator( 
                                       train_generator, 
-                                      samples_per_epoch=((len(train_samples)*6)/32), 
+                                      samples_per_epoch=(N//batch_size)*batch_size,
                                       validation_data=validation_generator, 
-                                      nb_val_samples=(len(validation_samples)*6), 
-                                      nb_epoch=3 
+                                      nb_val_samples=(M//batch_size)*batch_size,
+                                      nb_epoch=no_of_epoch,
+                                      verbose=1
                                     )
 ## Save the model
 model.save('model.h5')
