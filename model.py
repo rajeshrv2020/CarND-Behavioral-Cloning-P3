@@ -22,14 +22,14 @@ no_of_epoch = 10
 
 
 ## Read the CSV File
-with open ('./data/driving_log.csv') as csv_file :
+#with open ('./data/driving_log.csv') as csv_file :
+with open ('./udacity_data/driving_log.csv') as csv_file :
     reader = csv.reader(csv_file)
     for sample in reader: 
         samples.append(sample)
 
 # Delete the first element which is the header name of each column
-del samples[0]
-
+#del samples[0]
 
 def normalize_image(image) :
     return (image/255.0)-0.5
@@ -63,7 +63,8 @@ def generator (samples, batch_size=128) :
                 for i in range(3) :
                         source_path = batch_sample[i]
                         filename = os.path.basename(source_path)
-                        complete_filename = './data/IMG/' + filename
+                        #complete_filename = './data/IMG/' + filename
+                        complete_filename = './udacity_data/IMG/' + filename
                 
                         # Read the image
                         image = cv2.imread(complete_filename)
