@@ -8,6 +8,7 @@ from keras.layers import Convolution2D, MaxPooling2D
 from keras.layers import Cropping2D, Lambda
 from keras.utils import np_utils
 from keras.models import Model
+from keras.callbacks import EarlyStopping, ModelCheckpoint
 from random import shuffle
 import matplotlib.pyplot as plt
 import sklearn
@@ -147,7 +148,7 @@ def NvidiaNet(model) :
 model = Sequential()
 
 # Corp the image. As per the tutorial, GPU performs it faster
-model.add(Cropping2D(cropping=((60,20),(0,0)), input_shape=(160,320,3)))
+model.add(Cropping2D(cropping=((70,25),(0,0)), input_shape=(160,320,3)))
 
 # Normalize the image 
 model.add(Lambda(lambda x: x/255.0 - 0.5))
@@ -159,6 +160,12 @@ model = NvidiaNet(model)
 # Compile and fit the model
 model.compile(loss='mse', optimizer='adam')
 
+callbacks = [EarlyStopping(monitor='val_loss', patience=2, verbose=0), 
+             ModelCheckpoint('model.{epoch:02d}-{val_loss:.4f}.h5', 
+                  monitor='val_loss', 
+                  save_best_only = True, 
+                  verbose = 0),]
+
 N = 6*len(train_samples)
 M = 6*len(validation_samples)
 
@@ -168,7 +175,8 @@ history_object = model.fit_generator(
                                       validation_data=validation_generator, 
                                       nb_val_samples=(M//batch_size)*batch_size,
                                       nb_epoch=no_of_epoch,
-                                      verbose=1
+                                      verbose=1,
+                                      callbacks=callbacks
                                     )
 ## Save the model
 model.save('model.h5')
