@@ -4,7 +4,7 @@ import cv2
 import numpy as np
 from keras.models import Sequential
 from keras.layers import Dense, Dropout,Activation , Flatten
-from keras.layers import Convolution2D, MaxPooling2D
+from keras.layers import Convolution2D, MaxPooling2D, SpatialDropout2D
 from keras.layers import Cropping2D, Lambda
 from keras.utils import np_utils
 from keras.models import Model
@@ -29,17 +29,35 @@ with open ('./udacity_data/driving_log.csv') as csv_file :
     for sample in reader: 
         samples.append(sample)
 
+filtered_samples = []
+
+### Delete the 70% of samples with angle == 0
+for sample in samples :
+    if float(sample[3]) == 0 : 
+        if (np.random.random() > 0.7) :
+             filtered_samples.append(sample)
+    else :
+        filtered_samples.append(sample)
+
+
+
 # Delete the first element which is the header name of each column
 #del samples[0]
 
 def normalize_image(image) :
     return (image/255.0)-0.5
 
+
+def resize_image(image) :
+    return cv2.resize(image, (64,64))
+
 print(len(samples))
+print(len(filtered_samples))
 
 ## Split the training sample and validationn sample 
 from sklearn.model_selection import train_test_split
-train_samples, validation_samples = train_test_split(samples, test_size=0.2)
+#train_samples, validation_samples = train_test_split(samples, test_size=0.2)
+train_samples, validation_samples = train_test_split(filtered_samples, test_size=0.2)
 
 ## Generator for loading and preprocessing the image
 def generator (samples, batch_size=128) :
@@ -132,14 +150,21 @@ def LeNet(model, dropout=False) :
 ####### Nvidia Architecture
 def NvidiaNet(model) :
     model.add(Convolution2D(24,5,5,subsample=(2,2),activation="relu"))
+    model.add(SpatialDropout2D(0.5))
     model.add(Convolution2D(36,5,5,subsample=(2,2),activation="relu"))
+    model.add(SpatialDropout2D(0.5))
     model.add(Convolution2D(48,5,5,subsample=(2,2),activation="relu"))
+    model.add(SpatialDropout2D(0.5))
     model.add(Convolution2D(64,3,3,activation="relu"))
+    model.add(SpatialDropout2D(0.5))
     model.add(Convolution2D(64,3,3,activation="relu"))
+    model.add(SpatialDropout2D(0.5))
     model.add(Flatten())
-    model.add(Dense(100))
-    model.add(Dense(50))
-    model.add(Dense(10))
+    model.add(Dropout(0.6))
+    model.add(Dense(100, activation="elu"))
+    model.add(Dense(50, activation="elu"))
+    model.add(Dense(10, activation="elu"))
+    model.add(Dropout(0.6))
     model.add(Dense(1))
     return model
        
@@ -148,7 +173,10 @@ def NvidiaNet(model) :
 model = Sequential()
 
 # Corp the image. As per the tutorial, GPU performs it faster
-model.add(Cropping2D(cropping=((70,25),(0,0)), input_shape=(160,320,3)))
+model.add(Cropping2D(cropping=((60,20),(0,0)), input_shape=(160,320,3)))
+
+# Resize the image 
+#model.add(Lambda(lambda x: resize_image(x)))
 
 # Normalize the image 
 model.add(Lambda(lambda x: x/255.0 - 0.5))
