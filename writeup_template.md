@@ -18,15 +18,14 @@ The goals / steps of this project are the following:
 
 [//]: # (Image References)
 
-[
-
-[image1]: ./examples/placeholder.png "Model Visualization"
-[image2]: ./examples/placeholder.png "Grayscaling"
-[image3]: ./examples/placeholder_small.png "Recovery Image"
-[image4]: ./examples/placeholder_small.png "Recovery Image"
-[image5]: ./examples/placeholder_small.png "Recovery Image"
-[image6]: ./examples/placeholder_small.png "Normal Image"
-[image7]: ./examples/placeholder_small.png "Flipped Image"
+[image1]: images/architecture.jpg "Architecture"
+[image2]: images/center_driving.jpg "Center Driving"
+[image3]: images/left_recovery_1.jpg "Left Recovery"
+[image4]: images/left_recovery_2.jpg "Left Recovery"
+[image5]: images/right_recovery_1.jpg "Right Recovery"
+[image6]: images/unflipped_image.jpg "Unflipper Image"
+[image7]: images/flipped_image.jpg "Dataset"
+[image8]: images/dataset.jpg "Dataset"
 
 ## Rubric Points
 ###Here I will consider the [rubric points](https://review.udacity.com/#!/rubrics/432/view) individually and describe how I addressed each point in my implementation.  
@@ -40,7 +39,8 @@ My project includes the following files:
 * model.py containing the script to create and train the model
 * drive.py for driving the car in autonomous mode
 * model.h5 containing a trained convolution neural network 
-* writeup_report.md or writeup_report.pdf summarizing the results
+* writeup_report.md summarizing the results
+# README.md which is same as writeup_report,md which you have viewing
 
 ####2. Submission includes functional code
 Using the Udacity provided simulator and my drive.py file, the car can be driven autonomously around the track by executing 
@@ -56,19 +56,31 @@ The model.py file contains the code for training and saving the convolution neur
 
 ####1. An appropriate model architecture has been employed
 
-My model consists of a convolution neural network with 3x3 filter sizes and depths between 32 and 128 (model.py lines 18-24) 
-
-The model includes RELU layers to introduce nonlinearity (code line 20), and the data is normalized in the model using a Keras lambda layer (code line 18). 
+My model consists of 
+ - 5 Convolution layers with each made of
+        - 5x5 stride with filter depth = 24 [ model.py line_no: 143  ]
+        - 5x5 stride with filter depth = 36 [ model.py line_no: 145  ]
+        - 5x5 stride with filter depth = 48 [ model.py line_no: 147  ]
+        - 3x3 stride with filter depth = 64 [ model.py line_no: 149  ]
+        - 3x3 stride with filter depth = 64 [ model.py line_no: 151  ]
+ - Dropout layer sandwidth between the convolution layers [ model.py line_no: 144,146,168.150,152  ]
+ - One Flattened layer  [ model.py line_no: 153  ]
+ - A Dropout layer before fully connected layer [ model.py line_no: 154 ]
+ - 3 Fully connected layers with depth of 100,50,10  [ model.py line_no: 155-157 ]
+ - A Dropout layer before output layer [ model.py line_no: 158 ]
+ - Finally , a dropout layer [ model.py line_no: 159 ]
+        
+The model includes RELU and ELU layers to introduce nonlinearity , and the data is normalized in the model using a Keras lambda layer [ model.py line_no: 174  ]
 
 ####2. Attempts to reduce overfitting in the model
 
-The model contains dropout layers in order to reduce overfitting (model.py lines 21). 
+The model contains dropout layers in order to reduce overfitting. (line numbers pointed out in the above section )
 
-The model was trained and validated on different data sets to ensure that the model was not overfitting (code line 10-16). The model was tested by running it through the simulator and ensuring that the vehicle could stay on the track.
+The model was trained and validated on different data sets to ensure that the model was not overfitting . The model was tested by running it through the simulator and ensuring that the vehicle could stay on the track.
 
 ####3. Model parameter tuning
 
-The model used an adam optimizer, so the learning rate was not tuned manually (model.py line 25).
+The model used an adam optimizer, so the learning rate was not tuned manually  [ model.py line_no: 181  ]
 
 ####4. Appropriate training data
 
@@ -82,27 +94,23 @@ For details about how I created the training data, see the next section.
 
 The overall strategy for deriving a model architecture was to based on Nividia Architecture. 
 
-My first step was to use a convolution neural network model similar to the LeNet Architecture. The MSE was high (>1) . So, i decided to try out Nividia Architecture.
+My first step was to use a convolution neural network model similar to the LeNet Architecture. The MSE was high (>1) . So, i decided to try out Nividia Architecture. 
 
-... I thought this model might be appropriate because ...
+I thought this model might be appropriate because MSE was less than 0.1 during the first epoch.
 
 In order to gauge how well the model was working, I split my image and steering angle data into a training and validation set. I found that my first model had a low mean squared error on the training set but a high mean squared error on the validation set. This implied that the model was overfitting. 
 
 To combat the overfitting, I modified the model to add dropouts in between convolution layers.
 
-Then I 
-
 The final step was to run the simulator to see how well the car was driving around track one. There were a few spots where the vehicle fell off the track. 
 
-To address it, i collected more dataset at the failing spots. Example. Sharp Left turn.a
+To address it, i collected more dataset at the failing spots. Example. Sharp Left turn.
 
 At the end of the process, the vehicle is able to drive autonomously around the track without leaving the road.
 
 ####2. Final Model Architecture
 
-The final model architecture (model.py lines 18-24) consisted of a convolution neural network with the following layers and layer sizes ...
-
-Here is a visualization of the architecture 
+The final model architecture (model.py lines 18-24) consisted of a convolution neural network as seen below
 
 ![alt text][image1]
 
@@ -112,32 +120,34 @@ To capture good driving behavior, I first recorded two laps on track one using c
 
 ![alt text][image2]
 
-Tranining data is collected by driving the car for 3 laps and driving the lap in the reverse direction. Car would drift in some of the place
+Tranining data is collected by driving the car for 3 laps and driving the lap in the reverse direction. 
 
+During the initial testing, the Car was not steering and it always keeps staight. I realised that the 80% of the datasets has steering angle of 0. So, i trimmed out the dataset with only 70% of the images with steering angle==0.
 
-The Driving behaviour was very bad where the car went off the road at sharp turns.  More data are collected from the track where the car was not driving 
+![alt text][image8]
 
-I then recorded the vehicle recovering from the left side and right sides of the road back to center so that the vehicle would learn to recovery back to the road. These images show what a recovery looks like starting from ... :
+After trimming the data, still the driving behaviour was very bad where the car went off the road at sharp turns.  More data are collected from the track where the car was drifing away.. 
+
+I then recorded the vehicle recovering from the left side and right sides of the road back to center so that the vehicle would learn to recovery back to the road. These images show what a recovery looks like.
 
 ![alt text][image3]
 ![alt text][image4]
 ![alt text][image5]
 
-Whenever the car 
+I keep adding the recovery images to the dataset untill car is able to recovery back to the road.
 
-
-
-// Then I repeated this process on track two in order to get more data points.
+To increase the dataset, i have used both left and right images with steering correction of 0.2.
 
 To augment the data sat, I also flipped images and angles thinking that this would ... For example, here is an image that has then been flipped:
 
 ![alt text][image6]
 ![alt text][image7]
 
-Etc ....
-
-After the collection process, I had X number of data points. I then preprocessed this data by ...
+After the collection process, I had 22782 number of data points. After zero steeting filtering, the dataset was 13221. After Augmentation, the total dataset was 63510.
+ I then preprocessed this data by 
+  - Normalized the image
+  - Cropped the images only to the area of interest.
 
 I finally randomly shuffled the data set and put 20% of the data into a validation set. 
 
-I used this training data for training the model. The validation set helped determine if the model was over or under fitting. The ideal number of epochs was Z as evidenced by ... I used an adam optimizer so that manually training the learning rate wasn't necessary.
+I used this training data for training the model. The validation set helped determine if the model was over or under fitting. The ideal number of epochs was 5 as evidenced by ... I used an adam optimizer so that manually training the learning rate wasn't necessary.

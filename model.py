@@ -14,9 +14,6 @@ import matplotlib.pyplot as plt
 import sklearn
 import math 
 
-# Download the dataset from the following location
-# https://d17h27t6h515a5.cloudfront.net/topher/2016/December/584f6edd_data/data.zip 
-
 samples = []
 batch_size = 32
 no_of_epoch = 10
@@ -161,31 +158,16 @@ def NvidiaNet(model) :
     model.add(Dropout(0.6))
     model.add(Dense(1))
     return model
-       
 
-# ####### Nvidia Architecture
-# def NvidiaNet(model) :
-#     model.add(Convolution2D(24,5,5,subsample=(2,2),activation="relu"))
-#     model.add(Convolution2D(36,5,5,subsample=(2,2),activation="relu"))
-#     model.add(Convolution2D(48,5,5,subsample=(2,2),activation="relu"))
-#     model.add(Convolution2D(64,3,3,activation="relu"))
-#     model.add(Convolution2D(64,3,3,activation="relu"))
-#     model.add(Flatten())
-#     model.add(Dense(100))
-#     model.add(Dense(50))
-#     model.add(Dense(10))
-#     model.add(Dense(1))
-#     return model
-#        
 ####### Create the model here #####
 # Create the model
 model = Sequential()
 
 # Corp the image. As per the tutorial, GPU performs it faster
-#model.add(Cropping2D(cropping=((60,20),(0,0)), input_shape=(160,320,3)))
 model.add(Cropping2D(cropping=((70,25),(0,0)), input_shape=(160,320,3)))
 
 # Resize the image 
+# Somehow, my resize did not work
 #model.add(Lambda(lambda x: resize_image(x)))
 
 # Normalize the image 
@@ -230,5 +212,4 @@ plt.title('model mean squared error loss')
 plt.ylabel('mean squared error loss')
 plt.xlabel('epoch')
 plt.legend(['training set', 'validation set'], loc='upper right')
-#plt.show()
 plt.savefig('result.jpg')
