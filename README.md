@@ -118,11 +118,13 @@ To capture good driving behavior, I first recorded two laps on track one using c
 
 Tranining data is collected by driving the car for 3 laps and driving the lap in the reverse direction. 
 
-During the initial testing, the Car was not steering and it always keeps staight. I realised that the 80% of the datasets has steering angle of 0. So, i trimmed out the dataset with only 70% of the images with steering angle==0.
+During the initial testing, the Car was not steering and it always keeping staight. I realised that the 80% of the datasets has steering angle of 0.
 
 ![alt text][image8]
 
-After trimming the data, still the driving behaviour was very bad where the car went off the road at sharp turns.  More data are collected from the track where the car was drifing away.. 
+So, i trimmed out the dataset with only 70% of the images with steering angle==0.
+
+After trimming the data, still the driving behaviour was not great. The car went off the road at sharp turns.  More data are collected from the track where the car was drifing away.. 
 
 I then recorded the vehicle recovering from the left side and right sides of the road back to center so that the vehicle would learn to recovery back to the road. These images show what a recovery looks like.
 
@@ -132,9 +134,9 @@ I then recorded the vehicle recovering from the left side and right sides of the
 
 I keep adding the recovery images to the dataset untill car is able to recovery back to the road.
 
-To increase the dataset, i have used both left and right images with steering correction of 0.2.
+Also, to increase the dataset, i have used both left and right images with steering correction of 0.2.
 
-To augment the data sat, I also flipped images and angles thinking that this would ... For example, here is an image that has then been flipped:
+To augment the data sat, I also flipped images and angles thinking that this would add more images to the dataset. For example, here is an image that has been flipped:
 
 ![alt text][image6]
 ![alt text][image7]
@@ -148,6 +150,6 @@ I finally randomly shuffled the data set and put 20% of the data into a validati
 
 I used this training data for training the model. The validation set helped determine if the model was over or under fitting. 
 
-I used callbacks to save the best run. My Epoch was set to 10.The ideal number of epochs was 5 since the best model to be reached by epoch 5. 
+I used callbacks to save the best run. My Epoch was set to 10.The ideal number of epochs was 5 since the best model was reached by epoch 5. 
 
 I used an adam optimizer so that manually training the learning rate wasn't necessary.
