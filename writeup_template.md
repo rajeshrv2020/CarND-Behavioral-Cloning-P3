@@ -54,10 +54,15 @@ The model.py file contains the code for training and saving the convolution neur
 
 My model consists of 
  * 5 Convolution layers with each made of
+
         * 5x5 stride with filter depth = 24 [ model.py line_no: 143  ]
+
         * 5x5 stride with filter depth = 36 [ model.py line_no: 145  ]
+
         * 5x5 stride with filter depth = 48 [ model.py line_no: 147  ]
+
         * 3x3 stride with filter depth = 64 [ model.py line_no: 149  ]
+
         * 3x3 stride with filter depth = 64 [ model.py line_no: 151  ]
  * Dropout layer sandwidth between the convolution layers [ model.py line_no: 144,146,168.150,152  ]
  * One Flattened layer  [ model.py line_no: 153  ]
