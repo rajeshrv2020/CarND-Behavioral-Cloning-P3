@@ -21,10 +21,8 @@ samples = []
 batch_size = 32
 no_of_epoch = 10
 
-
 ## Read the CSV File
-#with open ('./data/driving_log.csv') as csv_file :
-with open ('./udacity_data/driving_log.csv') as csv_file :
+with open ('./data/driving_log.csv') as csv_file :
     reader = csv.reader(csv_file)
     for sample in reader: 
         samples.append(sample)
@@ -38,8 +36,6 @@ for sample in samples :
              filtered_samples.append(sample)
     else :
         filtered_samples.append(sample)
-
-
 
 # Delete the first element which is the header name of each column
 #del samples[0]
@@ -82,8 +78,7 @@ def generator (samples, batch_size=128) :
                 for i in range(3) :
                         source_path = batch_sample[i]
                         filename = os.path.basename(source_path)
-                        #complete_filename = './data/IMG/' + filename
-                        complete_filename = './udacity_data/IMG/' + filename
+                        complete_filename = './data/IMG/' + filename
                 
                         # Read the image
                         image = cv2.imread(complete_filename)
@@ -146,19 +141,18 @@ def LeNet(model, dropout=False) :
     model.add(Activation("softmax"))
     return model
 
-
 ####### Nvidia Architecture
 def NvidiaNet(model) :
     model.add(Convolution2D(24,5,5,subsample=(2,2),activation="relu"))
-    model.add(SpatialDropout2D(0.5))
+    model.add(SpatialDropout2D(0.2))
     model.add(Convolution2D(36,5,5,subsample=(2,2),activation="relu"))
-    model.add(SpatialDropout2D(0.5))
+    model.add(SpatialDropout2D(0.2))
     model.add(Convolution2D(48,5,5,subsample=(2,2),activation="relu"))
-    model.add(SpatialDropout2D(0.5))
+    model.add(SpatialDropout2D(0.2))
     model.add(Convolution2D(64,3,3,activation="relu"))
-    model.add(SpatialDropout2D(0.5))
+    model.add(SpatialDropout2D(0.2))
     model.add(Convolution2D(64,3,3,activation="relu"))
-    model.add(SpatialDropout2D(0.5))
+    model.add(SpatialDropout2D(0.2))
     model.add(Flatten())
     model.add(Dropout(0.6))
     model.add(Dense(100, activation="elu"))
@@ -168,12 +162,28 @@ def NvidiaNet(model) :
     model.add(Dense(1))
     return model
        
+
+# ####### Nvidia Architecture
+# def NvidiaNet(model) :
+#     model.add(Convolution2D(24,5,5,subsample=(2,2),activation="relu"))
+#     model.add(Convolution2D(36,5,5,subsample=(2,2),activation="relu"))
+#     model.add(Convolution2D(48,5,5,subsample=(2,2),activation="relu"))
+#     model.add(Convolution2D(64,3,3,activation="relu"))
+#     model.add(Convolution2D(64,3,3,activation="relu"))
+#     model.add(Flatten())
+#     model.add(Dense(100))
+#     model.add(Dense(50))
+#     model.add(Dense(10))
+#     model.add(Dense(1))
+#     return model
+#        
 ####### Create the model here #####
 # Create the model
 model = Sequential()
 
 # Corp the image. As per the tutorial, GPU performs it faster
-model.add(Cropping2D(cropping=((60,20),(0,0)), input_shape=(160,320,3)))
+#model.add(Cropping2D(cropping=((60,20),(0,0)), input_shape=(160,320,3)))
+model.add(Cropping2D(cropping=((70,25),(0,0)), input_shape=(160,320,3)))
 
 # Resize the image 
 #model.add(Lambda(lambda x: resize_image(x)))
